@@ -107,7 +107,7 @@ def main() -> None:
         prompt = (
             f"The following greyscale image is a Fashion‑MNIST item labeled ‘{LABEL_MAP[label_id]}’.\n"
             "Return a catchy 4–5‑word English description suitable as a filename.\n"
-            "Avoid category words like T‑shirt, Trouser, etc.; use only descriptive adjectives/nouns."
+            "Avoid category words like T‑shirt, Trouser, etc.; use only descriptive adjectives/nouns.At the end put its category at the end"
         )
 
         try:
