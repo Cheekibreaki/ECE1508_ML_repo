@@ -31,13 +31,18 @@ from tqdm import tqdm
 from openai import OpenAI, OpenAIError
 
 # ─────────────────────────── Configuration ──────────────────────────
-N_IMAGES: int = 100
+N_IMAGES: int = 14000
+START_ROW: int = 14_000
 TRAIN_CSV: str = "fashion-mnist_train.csv"
-OUT_DIR_TMPL: str = "data_generation_{start}-{end}_{date}"
-MAX_TOKENS: int = 20
+OUT_DIR_TMPL: str = "data_generation_{start}-{end}_{timestamp}"
+MAX_TOKENS: int = 30
 
 # Provide your API key via env‑var or replace placeholder
 OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY", "YOUR_API_KEY_HERE")
+
+
+
+MAX_DESC_WORDS: int = 20
 
 LABEL_MAP = {
     0: "T-shirt/top",
@@ -54,19 +59,21 @@ LABEL_MAP = {
 
 # ────────────────────────────── Helpers ─────────────────────────────
 
-def load_data(csv_path: str, n_images: int) -> Tuple[pd.DataFrame, List[int]]:
-    """Load *n_images* rows from the local Fashion‑MNIST CSV.
-
-    Mimics the structure of the user‑provided `load_data` function but focuses on
-    the **training set only** because we just need sample images. Returns a data
-    frame (`pixels_df`) and the corresponding *label* list.
-    """
+def load_data(csv_path: str, n_images: int, start_row: int = 0):
+    """Load *n_images* rows beginning at *start_row* from the CSV."""
     df = pd.read_csv(csv_path)
-    df = df.head(n_images)
+    df = df.iloc[start_row : start_row + n_images]   # ← skip the first rows
     labels = df["label"].tolist()
     pixels_df = df.drop(columns=["label"])
     return pixels_df, labels
 
+def _is_valid_desc(desc: str, max_words: int = MAX_DESC_WORDS) -> bool:
+    """True if `desc` has ≤ `max_words` words."""
+    if len(desc.strip().split()) <= max_words:
+        return True
+    else:
+        print(desc)
+        return False
 
 def _sanitize_filename(text: str) -> str:
     """Convert arbitrary text to a safe, lowercase filename."""
@@ -84,11 +91,17 @@ def _image_url_obj(img: Image.Image, detail: str = "auto") -> Dict[str, Any]:
 
 def main() -> None:
     # 1. Load the first *N_IMAGES* images & labels via user‑style loader
-    pixels_df, labels = load_data(TRAIN_CSV, N_IMAGES)
+    pixels_df, labels = load_data(TRAIN_CSV, N_IMAGES, start_row=START_ROW)
 
     # 2. Prepare output directory
-    today = _dt.date.today().isoformat()
-    out_dir = Path(OUT_DIR_TMPL.format(start=0, end=N_IMAGES - 1, date=today))
+    timestamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = Path(
+        OUT_DIR_TMPL.format(
+            start=START_ROW,
+            end=START_ROW + N_IMAGES - 1,
+            timestamp=timestamp,
+        )
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # 3. Initialise OpenAI client
@@ -104,11 +117,37 @@ def main() -> None:
         # Convert flat pixel array to 28×28 grayscale PIL image
         img = Image.fromarray(pixel_row.reshape(28, 28).astype("uint8"), mode="L")
 
+
+        # prompt = (  f"""
+        # You are a product copywriter creating concise catalog-friendly descriptors for Fashion-MNIST items.
+        # Image label: '{LABEL_MAP[label_id]}'.
+        # Generate a refined 4–5 WORD English descriptor using elevated, tasteful adjectives and style/fabric nouns (no verbs).
+        # Do NOT include any explicit category terms (T-shirt, Trouser, etc.) in the descriptor body.
+        # Append a single space and then the category label exactly as given: {LABEL_MAP[label_id]}.
+        # Return ONE LINE ONLY, suitable for a filename (letters, numbers, spaces only; no punctuation).
+        # Example format: "textured minimalist knit panel {LABEL_MAP[label_id]}".
+        # Image follows.
+        # """
+        #             )
+        # prompt = (f"""
+        #     You are describing a Fashion-MNIST image for a dataset.
+        #     Label: '{LABEL_MAP[label_id]}'.
+        #     Write ONE short grammatical English sentence (up to ~12 words) that naturally describes the item. Everyday tone is fine.
+        #     Avoid saying the category name inside the sentence (no T-shirt, Trouser, etc.).
+        #     After the sentence, append a single space and then the category label exactly as given: {LABEL_MAP[label_id]}.
+        #     Return ONE LINE ONLY. Minimal punctuation: end the sentence with a period before the space+category is OK, or omit punctuation entirely; just be consistent.
+        #     Example format: "A soft knit top with relaxed shoulders. {LABEL_MAP[label_id]}".
+        #     Image follows.
+        #     """)
+
         prompt = (
             f"The following greyscale image is a Fashion‑MNIST item labeled ‘{LABEL_MAP[label_id]}’.\n"
-            "Return a catchy 4–5‑word English description suitable as a filename.\n"
-            "Avoid category words like T‑shirt, Trouser, etc.; use only descriptive adjectives/nouns.At the end put its category at the end"
+            "Return a 4–5 word English description in simple, everyday language.\n"
+            "Use only adjectives and nouns (e.g., 'soft cotton casual wear').\n"
+            "Do not use category words like T‑shirt or Trouser.\n"
+            "Add the original category word (‘{LABEL_MAP[label_id]}’) at the end."
         )
+
 
         try:
             response = client.responses.create(
@@ -125,8 +164,12 @@ def main() -> None:
             )
             description: str = response.output_text
         except (OpenAIError, KeyError, IndexError) as exc:
-            print(f"[WARN] OpenAI failed for idx={idx}: {exc}. Using fallback name.")
-            description = f"item_{idx}"
+            print(f"[WARN] OpenAI failed for idx={idx}: {exc}. Skipping this image.")
+            continue  # ⬅ Skip this image completely
+
+        if not description or not _is_valid_desc(description):
+            print(f"[WARN] Invalid description for idx={idx}: '{description}'. Skipping.")
+            continue  # ⬅ Skip this image completely
 
         filename = _sanitize_filename(description) + ".png"
         img.save(out_dir / filename)
