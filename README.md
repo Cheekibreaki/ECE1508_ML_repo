@@ -12,8 +12,8 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
 ## Project Structure
     ECE1508-ML_repo/
         ├── data_sampling/
-        │   ├── data_generation_0-99_2025-07-02   # dataset 100 samples
         │   └── main.py  # script for data generation pipline 
+        │   └── main.py  # script for trimming data label within a specific range (For experiment only)
         ├── final_model/
         │   └── presentation_UNet_V2.ipynb # final ipynb file deliverable
         ├── past_models/
