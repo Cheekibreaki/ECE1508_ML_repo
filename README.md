@@ -13,7 +13,8 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
     ECE1508-ML_repo/
         ├── data_sampling/
         │   └── main.py  # script for data generation pipline 
-        │   └── main.py  # script for trimming data label within a specific range (For experiment only)
+        │   └── trim.py  # script for trimming data label within any given specific lenth (For experiment run only)
+        │   └── data_9067.zip  # 9067 pieces of data used for model training + testing
         ├── final_model/
         │   └── presentation_UNet_V2.ipynb # final ipynb file deliverable
         ├── past_models/
