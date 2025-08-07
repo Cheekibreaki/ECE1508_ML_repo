@@ -17,6 +17,7 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
         │   └── data_9067.zip  # 9067 pieces of data used for model training + testing
         ├── final_model/
         │   └── presentation_UNet_V2.ipynb # final ipynb file deliverable
+        |   └── presentation_UNet_V2_Loaded.ipynb  # Same model as above, except initialized model thorugh loading pth instead of training. Shows the FID and Clip score.
         ├── past_models/
         │   ├── UNet_V2_with_dynamic_thresholding.ipynb
         │   ├── dynamic_thresholding_cfg_unet_v2_with_cross_attention_model.pth
