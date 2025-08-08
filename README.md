@@ -17,7 +17,7 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
         │   └── data_9067.zip  # 9067 pieces of data used for model training + testing
         ├── final_model/
         │   └── presentation_UNet_V2.ipynb # final ipynb file deliverable
-        |   └── presentation_UNet_V2_Loaded.ipynb  # Same model as above, except initialized model thorugh loading pth instead of training. Shows the FID and Clip score.
+        |   └── model_demo_and_eval.ipynb  # Same model as above, except model is initialized through loading pth instead of training. Then computes the FID and Clip score. 
         ├── past_models/
         │   ├── UNet_V2_with_dynamic_thresholding.ipynb
         │   ├── dynamic_thresholding_cfg_unet_v2_with_cross_attention_model.pth
@@ -36,13 +36,17 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
 
 
 2. It is recommended to run the .ipynb files in Google Colab. 
-
-3. To use specific zipped dataset in Google Colab, please mount drive and unzip the dataset files: 
+        Move presentation_UNet_V2_perf_demo.ipynb into colab,
+        Move data_9067.zip and dynamic_thresholding_cfg_unet_v2_with_cross_attention_model.pth into local google myDrive space
+4. To use specific zipped dataset in Google Colab, please mount drive and unzip the dataset files: 
 
         from google.colab import drive
         drive.mount('/content/drive')
 
         !unzip -q "/content/drive/MyDrive/<..... YOUR PATH .....>/data_full_9067.zip" -d /content/dataset  
-    
+
+        ckpt_dir  = "/content/drive/MyDrive/<..... YOUR PATH .....>"                
+        ckpt_name = "pooled_9067_full_checkpoint.pth"
+        ckpt_path = os.path.join(ckpt_dir, ckpt_name)
 
 
