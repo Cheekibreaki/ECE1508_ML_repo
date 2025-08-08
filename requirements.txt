@@ -1,11 +1,11 @@
 accelerate==1.9.0
-anyio==4.9.0
+anyio==4.10.0
 astunparse==1.6.3
 backcall==0.2.0
 bottleneck==1.4.2
 brotli==1.1.0
 cachetools==5.5.2
-certifi==2025.7.14
+certifi==2025.8.3
 chardet==5.2.0
 click==8.2.1
 cloudpickle==3.1.1
