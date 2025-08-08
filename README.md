@@ -39,12 +39,12 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
         Move presentation_UNet_V2_perf_demo.ipynb into colab,
         Move data_9067.zip and dynamic_thresholding_cfg_unet_v2_with_cross_attention_model.pth into local google myDrive space
 4. To use specific zipped dataset in Google Colab, please mount drive and unzip the dataset files: 
-    --------------------------------------------For Loading Dataset--------------------------------------------------------
+
         from google.colab import drive
         drive.mount('/content/drive')
 
         !unzip -q "/content/drive/MyDrive/<..... YOUR PATH .....>/data_full_9067.zip" -d /content/dataset  
-    --------------------------------------------For Loading PTH------------------------------------------------------------
+
         ckpt_dir  = "/content/drive/MyDrive/<..... YOUR PATH .....>"                
         ckpt_name = "pooled_9067_full_checkpoint.pth"
         ckpt_path = os.path.join(ckpt_dir, ckpt_name)
