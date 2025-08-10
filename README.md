@@ -18,6 +18,7 @@ Ziang Jia: ziang.jia@mail.utoronto.ca
         ├── final_model/
         │   └── presentation_UNet_V2.ipynb # final ipynb file deliverable
         |   └── model_demo_and_eval.ipynb  # Same model as above, except model is initialized through loading pth instead of training. Then computes the FID and Clip score. 
+        |   └── pooled_9067_full_checkpoint.pth # pth for model parameter loading
         ├── past_models/
         │   ├── UNet_V2_with_dynamic_thresholding.ipynb
         │   ├── dynamic_thresholding_cfg_unet_v2_with_cross_attention_model.pth
